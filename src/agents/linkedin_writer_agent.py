@@ -1,8 +1,9 @@
-from openai import OpenAI
 import os
+from dotenv import load_dotenv
+from openai import OpenAI
 
 
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+load_dotenv()
 
 
 SYSTEM_PROMPT = '''
@@ -12,6 +13,15 @@ Seu objetivo é transformar notícias técnicas de IA em posts humanos, naturais
 
 O tom deve parecer um Data Scientist Senior falando sobre tendências reais de IA aplicada.
 '''
+
+
+def get_client():
+    api_key = os.getenv('OPENAI_API_KEY')
+
+    if not api_key:
+        raise ValueError('OPENAI_API_KEY not found. Create a .env file based on .env.example.')
+
+    return OpenAI(api_key=api_key)
 
 
 def generate_linkedin_post(topic: str, summary: str):
@@ -29,8 +39,13 @@ def generate_linkedin_post(topic: str, summary: str):
     - Insight pessoal
     - Encerramento curto
 
-    Não use emojis excessivos.
+    Regras:
+    - Não use emojis excessivos.
+    - Não pareça um texto genérico de IA.
+    - Traga uma opinião prática sobre IA aplicada, dados ou tecnologia em produção.
     '''
+
+    client = get_client()
 
     response = client.chat.completions.create(
         model=os.getenv('LLM_MODEL', 'gpt-4o-mini'),
